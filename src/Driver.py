@@ -1,11 +1,14 @@
 import API
 
-p = API.PinnacleAPI()
+ao = API.AsianOddsAPI()
 
+print(ao.getAccountSummary())
+
+#TODO: make asianodds methods that are similar to below
 #sportsJSON = p.get(p.endpoints['sports'])
 #sportsArr = sportsJSON['sports']
 
-activeMarkets = p.getActiveMarkets()
+#activeMarkets = p.getActiveMarkets()
 
 #for am in activeMarkets:
 #    print am
@@ -15,11 +18,13 @@ activeMarkets = p.getActiveMarkets()
 #    print am
 #    print p.getOdds(am['id'])
 
-SID = 29
-o = p.getOdds(SID)
-print o
-o = p.getOdds(SID)
-print o
+#SID = 29
+#o = p.getOdds(SID)
+#pos = p.getPosition()
+#print pos
+#print o
+#o = p.getOdds(SID)
+#print o
 
 
 #o = p.getOdds(22)

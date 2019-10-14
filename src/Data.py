@@ -20,7 +20,7 @@ class Bet(Base):
     end_date = Column(String)
 
     def __repr__(self):
-        return "<Bet(sport_id='%s', sell_put='%s', buy_put='%s'>" % (
+        return "<Bet(sport_id='%s', sell_put='%s', buy_put='%s'" % (
             self.sport_id, self.sell_put, self.buy_put
         )
 
