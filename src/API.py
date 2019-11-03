@@ -1,8 +1,6 @@
 import requests
 import sys
 
-import Pinnacle
-
 # Encapsulates API connection details (authorization, url, etc)
 class API(object):
     def __init__(self):
