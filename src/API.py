@@ -26,8 +26,16 @@ class API(object):
         pass
 
 class AsianOddsAPI(API):
+    # initialization methods
     def __init__(self):
         API.__init__(self)
+        self.sports = {}
+        self.marketTypeIds = {
+            'Live' : 0,
+            'Today' : 1,
+            'Early' : 2
+        }
+
         init_url = 'http://webapi.asianodds88.com/AsianOddsService'
         init_headers = {'accept': 'application/json'}
         user = 'webapiuser46'
@@ -44,60 +52,88 @@ class AsianOddsAPI(API):
         register_url = self._base_url + ('/Register?username=%s' % user)
         reg_rsp = requests.get(register_url, headers = init_headers).json()
 
+        print("Message from AO: %s" % reg_rsp['Result']['TextMessage'])
         if (reg_rsp['Code'] == 0 and reg_rsp['Result']['Success'] == True):
             self._auth_headers = init_headers
             del self._auth_headers['AOKey']
-            print("AsianOdds API Setup Successful")
+
+            self.init_sports()
+            print("success: AsianOdds API setup")
             return
         else:
             sys.stderr.write(str(reg_rsp) + "\n")
             sys.exit("Error setting up AsianOdds API")
 
+    def init_sports(self):
+        self.sports = {}
+        sports_rsp = self.getSports()
+        if sports_rsp['Code'] == 0:
+            sports = sports_rsp['Data']
+            for sport in sports:
+                self.sports[sport['Name']] = sport
+            print("success: AsianOdds sports codes setup")
+        else:
+            sys.stderr.write(str(sports_rsp) + "\n")
+            sys.exit("Error setting up AsianOdds sports codes")
+
+    # straight AsianOdds API methods
+
+        # 2. Bet Details
+    def getBets(self):
+        return self.get('/GetBets')
+
+    def getBetByReference(self):
+        pass
+
+    def getRunningBets(self):
+        pass
+
+    def getNonRunningBets(self):
+        pass
+
+        # 3. Account Summary
     def getAccountSummary(self):
         return self.get('/GetAccountSummary')
 
+    def getHistoryStatement(self):
+        pass
+
+            # ...
+
+        # 4. Betting Methods
+    def getLeagues(self,
+     sportsType=None, marketTypeId=None, bookies=None, since=None,
+     sportName=None, marketTimeName=None):
+
+        if sportsType == None:
+            if sportName == None:
+                raise Exception("sports type or sports name is required")
+            else:
+                sportsType = self.sports[sportName]['Id']
+
+        if marketTypeId == None and marketTimeName:
+            marketTypeId = self.marketTypeIds[marketTimeName]
+
+        optionals = ''
+        if marketTypeId:
+            optionals += '&marketTypeId=%s' % marketTypeId
+
+        if bookies:
+            optionals += '&bookies=%s' % bookies
+
+        if since:
+            optionals += '&since=%s' % since
+
+        print("Getting: %s" % '/GetLeagues?sportsType=%s'%sportsType + optionals)
+        return self.get('/GetLeagues?sportsType=%s'%sportsType + optionals)
+
+
+    def getSports(self):
+        return self.get('/GetSports')
+
+    # additional helper methods
     def getOdds():
         pass
 
     def getPosition():
         pass
-
-### not using this for now, using the AsianOdds API instead ###
-#class PinnacleAPI(API):
-#    def __init__(self):
-#        self._base_url = 'http://api.ps3838.com'
-#        self._key = 'QUM4ODBCUzYwMTpwIW5uQGNMMw==' # FIXME security
-#        self._auth_headers = {'Authorization': 'Basic %s' % self._key}
-#        self.endpoints = {
-#            'sports': '/v2/sports',
-#            'odds': '/v1/odds',
-#            'bets': '/v1/bets',
-#        }
-#        self._lastOddsUpdateFor = {}
-#        self._oddsCache = {}
-#
-#    def getActiveMarkets(self):
-#        sportsArr = self.get(self.endpoints['sports'])['sports'] # pinnacle only has sports markets (i think)
-#        return filter(lambda s: s['hasOfferings'], sportsArr) # 'hasOfferings' = "Whether the sport currently has event"
-#
-#    def getOdds(self, sportId, isLive=0, oddsFormat="AMERICAN"):
-#        url = self.endpoints['odds'] + "?sportId=%s" % sportId
-#        url += "&isLive=%s" % isLive
-#        url += "&oddsFormat=%s" % oddsFormat
-#
-#        if (self._oddsCache.get(sportId) is None): # no saved data, must request
-#            print "NEW"
-#            oddsJSON = self.get(url)
-#            self._oddsCache[sportId] = None if oddsJSON == {} else Pinnacle.OddsResponse(oddsJSON)
-#        else: # use the "since" parameter and update current record
-#            print "OLD"
-#            odds = self._oddsCache[sportId]
-#            recentOdds = self.get(url + "&since=%s" % odds.last)
-#            odds.update(recentOdds)
-#
-#        return self._oddsCache[sportId]
-#
-#    def getPosition(self):
-#        url = self.endpoints['bets']
-#        url += "?betlist=running&fromDate=2019-07-29&toDate=2019-08-15"
-#        return self.get(url)

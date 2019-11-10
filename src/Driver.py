@@ -1,8 +1,14 @@
 import API
 
+import pprint
+pprint = pprint.pprint
+
 ao = API.AsianOddsAPI()
 
-print(ao.getAccountSummary())
+pprint(ao.getAccountSummary())
+
+pprint(ao.getLeagues(sportName='Football'))
+pprint(ao.getLeagues(sportName='Football', marketTimeName='Early'))
 
 #TODO: make asianodds methods that are similar to below
 #sportsJSON = p.get(p.endpoints['sports'])
